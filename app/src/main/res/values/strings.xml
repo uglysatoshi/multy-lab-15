@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">multy-lab-15</string>
+    <string name="settings">Настройки</string>
+    <string name="author">Об авторе</string>
+    <string name="new_item">Добавить новую запись</string>
+</resources>
