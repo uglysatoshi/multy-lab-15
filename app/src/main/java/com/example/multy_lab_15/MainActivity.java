@@ -1,34 +1,70 @@
 package com.example.multy_lab_15;
 
+import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
-public class MainActivity extends AppCompatActivity {
-    private EditText edit1;
-
+public class MainActivity extends ListActivity {
+    Integer i;
+    String[] from;
+    int[] to;
+    static ListView listView;
+    private EditText edit;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar myToolbar = findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);
 
+//        Toolbar myToolbar = findViewById(R.id.my_toolbar);
+//        AppCompatActivity.setSupportActionBar(myToolbar);
 
-//
-//        edit1 = findViewById(R.id.editText);
-//        SharedPreferences save = getSharedPreferences("SAVE",0);
-//        edit1.setText(save.getString("text",""));
-//        SharedPreferences.Editor editor = save.edit();
-//        editor.putString("text",edit1.getText().toString());
-//        editor.commit();
+        edit = findViewById(R.id.editText1Rec);
+        SharedPreferences save = getSharedPreferences("SAVE",0);
+        edit.setText(save.getString("text",""));
+        from = new String[]{"Name"};
+        to = new int[] {R.id.textViewListItemText};
+        Button add = findViewById(R.id.add);
+        SQLiteDatabase db = openOrCreateDatabase("DBName",MODE_PRIVATE,null);
+        db.execSQL("CREATE TABLE IF NOT EXISTS MyTable (_id INTEGER PRIMARY KEY AUTOINCREMENT, Name VARCHAR);");
+        Cursor cursor = db.rawQuery("SELECT * FROM Mytable", null);
+        i = cursor.getCount()+1;
+        if (cursor.getCount()>0) {
+            MyCursorAdapter scAdapter = new MyCursorAdapter(MainActivity.this,R.layout.list_item,cursor,from,to);
+            listView = getListView();
+            listView.setAdapter(scAdapter);
+        }
+        db.close();
+        add.setOnClickListener(view -> {
+            SQLiteDatabase db1 = openOrCreateDatabase("DBName",MODE_PRIVATE,null);
+            Cursor cursor2 = db1.rawQuery("SELECT * FROM Mytable", null);
+            i=cursor2.getCount()+1;
+            for (int k=1;k<=i;k++) {
+                Cursor cursor3 = db1.rawQuery("SELECT * FROM Mytable WHERE _id=" + k + "", null);
+                if (cursor3.getCount() == 0) {
+                    i = k;
+                    break;
+                }
+            }
+            db1.execSQL("INSERT INTO MyTable VALUES ('"+i+"','"+edit.getText().toString()+"');");
+            Cursor cursor1 = db1.rawQuery("SELECT * FROM Mytable", null);
+            MyCursorAdapter scAdapter = new MyCursorAdapter(MainActivity.this,R.layout.list_item, cursor1,from,to);
+            listView = getListView();
+            listView.setAdapter(scAdapter);
+            db1.close();
+            Toast.makeText(getListView().getContext(),"a row added to the table", Toast.LENGTH_LONG).show();
+
+        });
 
     }
 
@@ -55,4 +91,12 @@ public class MainActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        SharedPreferences save = getSharedPreferences("SAVE",0);
+        SharedPreferences.Editor editor = save.edit();
+        editor.putString("text",edit.getText().toString());
+        editor.apply();
+    }
 }

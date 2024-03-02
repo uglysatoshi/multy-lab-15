@@ -2,5 +2,9 @@
     <string name="app_name">multy-lab-15</string>
     <string name="settings">Настройки</string>
     <string name="author">Об авторе</string>
-    <string name="new_item">Добавить новую запись</string>
+    <string name="new_item">Введите новую запись</string>
+    <string name="insert">Добавить</string>
+    <string name="edit">Изменить</string>
+    <string name="delete">Удалить</string>
+    <string name="placeholder">placeholder</string>
 </resources>
